@@ -112,11 +112,14 @@ export interface PromptOptions {
   /**
    * Output mode for the generated prompt.
    *
-   * - `"generate"` (default): The LLM should output only JSONL patches (no prose).
-   * - `"chat"`: The LLM should respond conversationally first, then output JSONL patches.
+   * - `"standalone"` (default): The LLM should output only JSONL patches (no prose).
+   * - `"inline"`: The LLM should respond conversationally first, then output JSONL patches.
    *   Includes rules about interleaving text with JSONL and not wrapping in code fences.
+   *
+   * @deprecated `"generate"` — use `"standalone"` instead.
+   * @deprecated `"chat"` — use `"inline"` instead.
    */
-  mode?: "generate" | "chat";
+  mode?: "standalone" | "inline" | "generate" | "chat";
 }
 
 /**
@@ -563,15 +566,28 @@ function generatePrompt<TDef extends SchemaDefinition, TCatalog>(
   const {
     system = "You are a UI generator that outputs JSON.",
     customRules = [],
-    mode = "generate",
+    mode: rawMode = "standalone",
   } = options;
+
+  const mode: "standalone" | "inline" =
+    rawMode === "chat"
+      ? (console.warn(
+          '[json-render] mode "chat" is deprecated, use "inline" instead',
+        ),
+        "inline")
+      : rawMode === "generate"
+        ? (console.warn(
+            '[json-render] mode "generate" is deprecated, use "standalone" instead',
+          ),
+          "standalone")
+        : rawMode;
 
   const lines: string[] = [];
   lines.push(system);
   lines.push("");
 
   // Output format section - explain JSONL streaming patch format
-  if (mode === "chat") {
+  if (mode === "inline") {
     lines.push("OUTPUT FORMAT (text + JSONL, RFC 6902 JSON Patch):");
     lines.push(
       "You respond conversationally. When generating UI, first write a brief explanation (1-3 sentences), then output JSONL patch lines wrapped in a ```spec code fence.",
@@ -1014,7 +1030,7 @@ Note: state patches appear right after the elements that use them, so the UI fil
   // Rules
   lines.push("RULES:");
   const baseRules =
-    mode === "chat"
+    mode === "inline"
       ? [
           "When generating UI, wrap all JSONL patches in a ```spec code fence - one JSON object per line inside the fence",
           "Write a brief conversational response before any JSONL output",

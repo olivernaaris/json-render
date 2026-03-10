@@ -19,11 +19,11 @@ function FormUI() {
   );
 }
 
-function ChatModeDiagram() {
+function InlineModeDiagram() {
   return (
     <div className="flex flex-col h-full">
       <div className="text-xs font-medium text-muted-foreground mb-3 text-center">
-        Chat Mode
+        Inline Mode
       </div>
       <div className="flex-1 border border-border rounded-lg bg-background overflow-hidden flex flex-col">
         {/* Chat area */}
@@ -69,11 +69,11 @@ function ChatModeDiagram() {
   );
 }
 
-function GenerateModeDiagram() {
+function StandaloneModeDiagram() {
   return (
     <div className="flex flex-col h-full">
       <div className="text-xs font-medium text-muted-foreground mb-3 text-center">
-        Generate Mode
+        Standalone Mode
       </div>
       <div className="flex-1 border border-border rounded-lg bg-background overflow-hidden flex flex-row">
         {/* Left panel - prompt */}
@@ -104,10 +104,10 @@ export function GenerationModesDiagram() {
     <div className="not-prose my-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="h-[280px]">
-          <ChatModeDiagram />
+          <InlineModeDiagram />
         </div>
         <div className="h-[280px]">
-          <GenerateModeDiagram />
+          <StandaloneModeDiagram />
         </div>
       </div>
     </div>
