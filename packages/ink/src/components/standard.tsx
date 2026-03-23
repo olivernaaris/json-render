@@ -325,6 +325,7 @@ function TableComponent({ element }: ComponentRenderProps) {
     }>;
     rows?: Array<Record<string, string>>;
     borderStyle?: string;
+    backgroundColor?: string;
     headerColor?: string;
   };
 
@@ -363,7 +364,12 @@ function TableComponent({ element }: ComponentRenderProps) {
     | undefined;
 
   return (
-    <Box flexDirection="column" borderStyle={borderStyleProp}>
+    <Box
+      flexDirection="column"
+      alignSelf="flex-start"
+      borderStyle={borderStyleProp}
+      backgroundColor={p.backgroundColor}
+    >
       {/* Header */}
       <Box>
         {columns.map((col, i) => (
@@ -375,15 +381,19 @@ function TableComponent({ element }: ComponentRenderProps) {
       {/* Separator */}
       <Text dimColor>{colWidths.map((w) => "─".repeat(w)).join("─")}</Text>
       {/* Rows */}
-      {rows.map((row, rowIdx) => (
-        <Box key={rowIdx}>
-          {columns.map((col, i) => (
-            <Text key={col.key}>
-              {padCell(row[col.key] || "—", colWidths[i]!, col.align)}
-            </Text>
-          ))}
-        </Box>
-      ))}
+      {rows.map((row, rowIdx) => {
+        const rowKey =
+          columns.map((c) => row[c.key] ?? "").join("\0") || String(rowIdx);
+        return (
+          <Box key={rowKey} gap={0}>
+            {columns.map((col, i) => (
+              <Text key={col.key}>
+                {padCell(row[col.key] || "—", colWidths[i]!, col.align)}
+              </Text>
+            ))}
+          </Box>
+        );
+      })}
     </Box>
   );
 }
@@ -402,7 +412,7 @@ function ListComponent({ element }: ComponentRenderProps) {
   return (
     <Box flexDirection="column" gap={p.spacing ?? 0}>
       {items.map((item, i) => (
-        <Box key={i} gap={1}>
+        <Box key={`${i}:${item}`} gap={1}>
           <Text dimColor>{p.ordered ? `${i + 1}.` : bullet}</Text>
           <Text>{item}</Text>
         </Box>
@@ -434,16 +444,15 @@ function ListItemComponent({ element }: ComponentRenderProps) {
 function CardComponent({ element, children }: ComponentRenderProps) {
   const p = element.props as {
     title?: string;
-    borderStyle?: "single" | "double" | "round" | "bold" | "classic";
-    borderColor?: string;
+    backgroundColor?: string;
     padding?: number;
   };
 
   return (
     <Box
       flexDirection="column"
-      borderStyle={p.borderStyle ?? "round"}
-      borderColor={p.borderColor}
+      alignSelf="flex-start"
+      backgroundColor={p.backgroundColor ?? "#1a1a1a"}
       padding={p.padding ?? 1}
     >
       {p.title ? (
@@ -538,8 +547,134 @@ function StatusLineComponent({ element }: ComponentRenderProps) {
 }
 
 // =============================================================================
+// Metric, Callout, Timeline
+// =============================================================================
+
+const TREND_CONFIG: Record<string, { prefix: string; color: string }> = {
+  up: { prefix: "+", color: "green" },
+  down: { prefix: "", color: "red" },
+  neutral: { prefix: "~", color: "gray" },
+};
+
+function MetricComponent({ element }: ComponentRenderProps) {
+  const p = element.props as {
+    label?: string;
+    value?: string;
+    detail?: string;
+    trend?: "up" | "down" | "neutral";
+  };
+
+  const trend = p.trend ? TREND_CONFIG[p.trend] : null;
+
+  return (
+    <Box flexDirection="column">
+      <Text dimColor>{p.label ?? ""}</Text>
+      <Box gap={1}>
+        <Text bold>{p.value ?? ""}</Text>
+        {trend && p.detail ? (
+          <Text color={trend.color}>
+            {trend.prefix}
+            {p.detail}
+          </Text>
+        ) : null}
+      </Box>
+      {!trend && p.detail ? <Text dimColor>{p.detail}</Text> : null}
+    </Box>
+  );
+}
+
+const CALLOUT_CONFIG: Record<string, { label: string; color: string }> = {
+  info: { label: "INFO", color: "blue" },
+  tip: { label: "TIP", color: "green" },
+  warning: { label: "WARNING", color: "yellow" },
+  important: { label: "IMPORTANT", color: "magenta" },
+};
+
+function CalloutComponent({ element }: ComponentRenderProps) {
+  const p = element.props as {
+    type?: "info" | "tip" | "warning" | "important";
+    title?: string;
+    content?: string;
+  };
+
+  const config = CALLOUT_CONFIG[p.type ?? "info"] ?? CALLOUT_CONFIG.info!;
+
+  return (
+    <Box
+      flexDirection="column"
+      borderStyle="bold"
+      borderLeft
+      borderRight={false}
+      borderTop={false}
+      borderBottom={false}
+      borderColor={config.color}
+      paddingLeft={1}
+    >
+      {p.title ? (
+        <Text bold color={config.color}>
+          {p.title}
+        </Text>
+      ) : null}
+      <Text>{p.content ?? ""}</Text>
+    </Box>
+  );
+}
+
+const TIMELINE_DOT: Record<string, { dot: string; color: string }> = {
+  completed: { dot: "●", color: "green" },
+  current: { dot: "◆", color: "cyan" },
+  upcoming: { dot: "○", color: "gray" },
+};
+
+function TimelineComponent({ element }: ComponentRenderProps) {
+  const p = element.props as {
+    items?: Array<{
+      title?: string;
+      description?: string;
+      date?: string;
+      status?: "completed" | "current" | "upcoming";
+    }>;
+  };
+
+  const items = p.items ?? [];
+
+  return (
+    <Box flexDirection="column" gap={1}>
+      {items.map((item, i) => {
+        const cfg =
+          TIMELINE_DOT[item.status ?? "upcoming"] ?? TIMELINE_DOT.upcoming!;
+        return (
+          <Box key={i} flexDirection="column">
+            <Box gap={1}>
+              <Text color={cfg.color}>{cfg.dot}</Text>
+              <Text bold>{item.title ?? ""}</Text>
+              {item.date ? <Text dimColor>{item.date}</Text> : null}
+            </Box>
+            {item.description ? (
+              <Box paddingLeft={2}>
+                <Text dimColor>{item.description}</Text>
+              </Box>
+            ) : null}
+          </Box>
+        );
+      })}
+    </Box>
+  );
+}
+
+// =============================================================================
 // Interactive Components
 // =============================================================================
+
+/** Count code points instead of UTF-16 code units (handles emoji/surrogate pairs). */
+function codePointLength(s: string): number {
+  return Array.from(s).length;
+}
+
+/** Slice by code point index instead of UTF-16 offset. */
+function codePointSlice(s: string, start: number, end?: number): string {
+  return Array.from(s).slice(start, end).join("");
+}
 
 function TextInputComponent({ element, emit, bindings }: ComponentRenderProps) {
   const p = element.props as {
@@ -556,11 +691,11 @@ function TextInputComponent({ element, emit, bindings }: ComponentRenderProps) {
   );
 
   const currentValue = value ?? "";
-  const [cursorPos, setCursorPos] = useState(currentValue.length);
+  const [cursorPos, setCursorPos] = useState(codePointLength(currentValue));
 
   // Keep cursor in bounds when value changes externally
   useEffect(() => {
-    setCursorPos((prev) => Math.min(prev, currentValue.length));
+    setCursorPos((prev) => Math.min(prev, codePointLength(currentValue)));
   }, [currentValue]);
 
   useInput(
@@ -573,8 +708,8 @@ function TextInputComponent({ element, emit, bindings }: ComponentRenderProps) {
       if (key.backspace || key.delete) {
         if (cursorPos > 0) {
           const newVal =
-            currentValue.slice(0, cursorPos - 1) +
-            currentValue.slice(cursorPos);
+            codePointSlice(currentValue, 0, cursorPos - 1) +
+            codePointSlice(currentValue, cursorPos);
           setValue(newVal);
           setCursorPos((prev) => prev - 1);
           emit("change");
@@ -588,7 +723,9 @@ function TextInputComponent({ element, emit, bindings }: ComponentRenderProps) {
         return;
       }
       if (key.rightArrow) {
-        setCursorPos((prev) => Math.min(currentValue.length, prev + 1));
+        setCursorPos((prev) =>
+          Math.min(codePointLength(currentValue), prev + 1),
+        );
         return;
       }
 
@@ -598,11 +735,11 @@ function TextInputComponent({ element, emit, bindings }: ComponentRenderProps) {
 
       if (input) {
         const newVal =
-          currentValue.slice(0, cursorPos) +
+          codePointSlice(currentValue, 0, cursorPos) +
           input +
-          currentValue.slice(cursorPos);
+          codePointSlice(currentValue, cursorPos);
         setValue(newVal);
-        setCursorPos((prev) => prev + input.length);
+        setCursorPos((prev) => prev + codePointLength(input));
         emit("change");
       }
     },
@@ -611,13 +748,12 @@ function TextInputComponent({ element, emit, bindings }: ComponentRenderProps) {
 
   const displayValue = currentValue
     ? p.mask
-      ? p.mask.repeat(currentValue.length)
+      ? p.mask.repeat(codePointLength(currentValue))
       : currentValue
     : "";
 
-  // Render with cursor position indicator
-  const before = displayValue.slice(0, cursorPos);
-  const after = displayValue.slice(cursorPos);
+  const before = codePointSlice(displayValue, 0, cursorPos);
+  const after = codePointSlice(displayValue, cursorPos);
 
   return (
     <Box gap={1}>
@@ -1178,6 +1314,9 @@ export const standardComponents: ComponentRegistry = {
   KeyValue: KeyValueComponent,
   Link: LinkComponent,
   StatusLine: StatusLineComponent,
+  Metric: MetricComponent,
+  Callout: CalloutComponent,
+  Timeline: TimelineComponent,
   TextInput: TextInputComponent,
   Select: SelectComponent,
   MultiSelect: MultiSelectComponent,
