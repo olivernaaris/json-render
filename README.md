@@ -15,8 +15,10 @@ npm install @json-render/core @json-render/react-native
 npm install @json-render/core @json-render/remotion
 # or for PDF documents
 npm install @json-render/core @json-render/react-pdf
-# or for HTML email
+# or for HTML email (react-email)
 npm install @json-render/core @json-render/react-email @react-email/components @react-email/render
+# or for HTML email (jsx-email)
+npm install @json-render/core @json-render/jsx-email jsx-email
 # or for Vue
 npm install @json-render/core @json-render/vue
 # or for Svelte
@@ -134,6 +136,7 @@ function Dashboard({ spec }) {
 | `@json-render/remotion`     | Remotion video renderer, timeline schema                               |
 | `@json-render/react-pdf`    | React PDF renderer for generating PDF documents from specs             |
 | `@json-render/react-email`  | React Email renderer for HTML/plain-text emails from specs             |
+| `@json-render/jsx-email`    | jsx-email renderer for HTML/plain-text emails from specs               |
 | `@json-render/ink`          | Ink terminal renderer with built-in components for interactive TUIs.   |
 | `@json-render/image`        | Image renderer for SVG/PNG output (OG images, social cards) via Satori |
 | `@json-render/codegen`      | Utilities for generating code from json-render UI trees                |
@@ -420,6 +423,52 @@ const spec = {
 
 const html = await renderToHtml(spec);
 ```
+
+### jsx-email (Email)
+
+```typescript
+import { renderToHtml } from "@json-render/jsx-email";
+import { schema, standardComponentDefinitions } from "@json-render/jsx-email";
+import { defineCatalog } from "@json-render/core";
+
+const catalog = defineCatalog(schema, {
+  components: standardComponentDefinitions,
+});
+
+const spec = {
+  root: "html-1",
+  elements: {
+    "html-1": {
+      type: "Html",
+      props: { lang: "en", dir: "ltr" },
+      children: ["head-1", "body-1"],
+    },
+    "head-1": { type: "Head", props: {}, children: [] },
+    "body-1": {
+      type: "Body",
+      props: { style: { backgroundColor: "#f6f9fc" } },
+      children: ["container-1"],
+    },
+    "container-1": {
+      type: "Container",
+      props: {
+        style: { maxWidth: "600px", margin: "0 auto", padding: "20px" },
+      },
+      children: ["heading-1", "text-1"],
+    },
+    "heading-1": { type: "Heading", props: { text: "Welcome" }, children: [] },
+    "text-1": {
+      type: "Text",
+      props: { text: "Thanks for signing up." },
+      children: [],
+    },
+  },
+};
+
+const html = await renderToHtml(spec);
+```
+
+Ships with jsx-email extras on top of the react-email baseline: `Code` (Shiki highlighting), `Font`, `Tailwind`, `Conditional` (MSO), `Raw`, `Background`, `ColorScheme`.
 
 ### Image (SVG/PNG)
 
