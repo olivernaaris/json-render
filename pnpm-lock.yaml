@@ -1993,9 +1993,6 @@ importers:
 
   packages/jsx-email:
     dependencies:
-      '@json-render/core':
-        specifier: workspace:*
-        version: link:../core
       jsx-email:
         specifier: ^2.8.4
         version: 2.8.4(@jsx-email/plugin-inline@1.0.1)(@jsx-email/plugin-minify@1.0.2)(@jsx-email/plugin-pretty@1.0.0)(@types/node@22.19.6)(@types/react-dom@19.2.3(@types/react@19.2.3))(@types/react@19.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
@@ -2006,6 +2003,9 @@ importers:
       '@internal/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@json-render/core':
+        specifier: workspace:*
+        version: link:../core
       '@types/react':
         specifier: 19.2.3
         version: 19.2.3
@@ -2080,9 +2080,6 @@ importers:
 
   packages/react:
     dependencies:
-      '@json-render/core':
-        specifier: workspace:*
-        version: link:../core
       react:
         specifier: ^19.2.3
         version: 19.2.4
@@ -2093,6 +2090,9 @@ importers:
       '@internal/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@json-render/core':
+        specifier: workspace:*
+        version: link:../core
       '@types/react':
         specifier: 19.2.3
         version: 19.2.3

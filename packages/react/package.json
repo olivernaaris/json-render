@@ -49,17 +49,17 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@json-render/core": "workspace:*"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@internal/react-state": "workspace:*",
     "@internal/typescript-config": "workspace:*",
+    "@json-render/core": "workspace:*",
     "@types/react": "19.2.3",
     "tsup": "^8.0.2",
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
+    "@json-render/core": "*",
     "react": "^19.2.3"
   }
 }
