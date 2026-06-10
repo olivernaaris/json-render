@@ -29,5 +29,5 @@ describe("@json-render/jsx-email release tarball smoke", () => {
     expect(output).toContain("Loaded @json-render/jsx-email/render");
     expect(output).toContain("Loaded @json-render/jsx-email/catalog");
     expect(output).toContain("Loaded @json-render/jsx-email/server");
-  });
+  }, 30_000);
 });

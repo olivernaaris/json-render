@@ -186,8 +186,10 @@ jobs:
 
           if [ "${{ github.event_name }}" = "release" ]; then
             RELEASE_TAG="${{ github.event.release.tag_name }}"
+            CHECKOUT_REF="$RELEASE_TAG"
           else
             RELEASE_TAG="v${{ needs.check-release.outputs.version }}"
+            CHECKOUT_REF="${{ github.sha }}"
           fi
 
           if [ -z "$RELEASE_TAG" ] || [ "$RELEASE_TAG" = "v" ]; then
@@ -196,11 +198,12 @@ jobs:
           fi
 
           echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "checkout_ref=$CHECKOUT_REF" >> "$GITHUB_OUTPUT"
 
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.release.outputs.tag }}
+          ref: ${{ steps.release.outputs.checkout_ref }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
