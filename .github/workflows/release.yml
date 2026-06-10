@@ -162,16 +162,45 @@ jobs:
 
   jsx-email-release-asset:
     name: Upload @json-render/jsx-email tarball
-    if: github.event_name == 'release'
+    needs: [check-release, github-release]
+    if: >-
+      always()
+      && (
+        github.event_name == 'release'
+        || needs.github-release.result == 'success'
+        || (
+          github.event_name == 'workflow_dispatch'
+          && needs.check-release.outputs.needs_github_release == 'false'
+          && needs.check-release.outputs.version != ''
+        )
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: write
     steps:
+      - name: Resolve release tag
+        id: release
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "release" ]; then
+            RELEASE_TAG="${{ github.event.release.tag_name }}"
+          else
+            RELEASE_TAG="v${{ needs.check-release.outputs.version }}"
+          fi
+
+          if [ -z "$RELEASE_TAG" ] || [ "$RELEASE_TAG" = "v" ]; then
+            echo "Error: Could not resolve release tag"
+            exit 1
+          fi
+
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ steps.release.outputs.tag }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -205,6 +234,7 @@ jobs:
           echo "tgz=$TGZ" >> "$GITHUB_OUTPUT"
 
       - name: Upload tarball to GitHub Release
-        run: gh release upload "${{ github.event.release.tag_name }}" "${{ steps.pack.outputs.tgz }}" --clobber
+        run: gh release upload "$RELEASE_TAG" "${{ steps.pack.outputs.tgz }}" --clobber
         env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
