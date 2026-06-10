@@ -297,6 +297,7 @@ function resolvePropValue(value, ctx) {
   return value;
 }
 function resolveElementProps(props, ctx) {
+  if (props == null) return {};
   const resolved = {};
   for (const [key, value] of Object.entries(props)) {
     resolved[key] = resolvePropValue(value, ctx);

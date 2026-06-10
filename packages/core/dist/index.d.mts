@@ -139,7 +139,7 @@ declare function resolvePropValue(value: unknown, ctx: PropResolutionContext): u
  * Resolve all prop values in an element's props object.
  * Returns a new props object with all expressions resolved.
  */
-declare function resolveElementProps(props: Record<string, unknown>, ctx: PropResolutionContext): Record<string, unknown>;
+declare function resolveElementProps(props: Record<string, unknown> | null | undefined, ctx: PropResolutionContext): Record<string, unknown>;
 /**
  * Scan an element's raw props for `$bindState` / `$bindItem` expressions
  * and return a map of prop name → resolved absolute state path.

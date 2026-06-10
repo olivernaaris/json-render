@@ -309,9 +309,14 @@ export function resolvePropValue(
  * Returns a new props object with all expressions resolved.
  */
 export function resolveElementProps(
-  props: Record<string, unknown>,
+  props: Record<string, unknown> | null | undefined,
   ctx: PropResolutionContext,
 ): Record<string, unknown> {
+  // Defensive: renderers can be fed Specs where an element's `props`
+  // field was omitted (agent-authored Specs, hand-crafted JSON). Treat
+  // missing/null props as an empty object rather than throwing
+  // "Cannot convert undefined or null to object".
+  if (props == null) return {};
   const resolved: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(props)) {
     resolved[key] = resolvePropValue(value, ctx);
