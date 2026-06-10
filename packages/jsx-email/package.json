@@ -57,6 +57,7 @@
     "dev": "tsup --watch",
     "prepack": "pnpm run build",
     "smoke:exports": "node --input-type=module -e \"for (const specifier of ['@json-render/jsx-email','@json-render/jsx-email/catalog','@json-render/jsx-email/render','@json-render/jsx-email/server']) await import(specifier);\"",
+    "smoke:tarball": "node scripts/smoke-release-tarball.mjs",
     "check-types": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },

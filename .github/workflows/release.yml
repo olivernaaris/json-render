@@ -220,19 +220,13 @@ jobs:
       - name: Smoke test package exports
         run: pnpm --filter @json-render/jsx-email smoke:exports
 
-      - name: Pack and verify tarball
+      - name: Pack and smoke test tarball
         id: pack
         run: |
           set -euo pipefail
-          VERSION=$(node -p "require('./packages/jsx-email/package.json').version")
           PACK_DIR="$RUNNER_TEMP/jsx-email-pack"
           mkdir -p "$PACK_DIR"
-          pnpm --filter @json-render/jsx-email pack --pack-destination "$PACK_DIR"
-          TGZ="$PACK_DIR/json-render-jsx-email-$VERSION.tgz"
-          test -f "$TGZ"
-          tar -tzf "$TGZ" > "$PACK_DIR/contents.txt"
-          grep -qx "package/dist/catalog.mjs" "$PACK_DIR/contents.txt"
-          echo "tgz=$TGZ" >> "$GITHUB_OUTPUT"
+          pnpm --filter @json-render/jsx-email smoke:tarball -- --pack-destination "$PACK_DIR"
 
       - name: Upload tarball to GitHub Release
         run: gh release upload "$RELEASE_TAG" "${{ steps.pack.outputs.tgz }}" --clobber

@@ -284,6 +284,44 @@ function renderElement(elementKey, spec, registry, stateModel, repeatItem, repea
     repeatIndex,
     repeatBasePath
   };
+  if (element.repeat) {
+    const items = getByPath(stateModel, element.repeat.statePath) ?? [];
+    const repeat = element.repeat;
+    const fragments = items.map((item, index) => {
+      const repeatKey = repeat.key;
+      const key = repeatKey && typeof item === "object" && item !== null ? String(item[repeatKey] ?? index) : String(index);
+      const childPath = `${repeat.statePath}/${index}`;
+      const itemCtx = {
+        stateModel,
+        repeatItem: item,
+        repeatIndex: index,
+        repeatBasePath: childPath
+      };
+      if (element.visible !== void 0 && !evaluateVisibility(element.visible, itemCtx)) {
+        return null;
+      }
+      const resolvedProps2 = resolveElementProps(
+        element.props,
+        itemCtx
+      );
+      const resolvedElement2 = { ...element, props: resolvedProps2 };
+      const Component2 = registry[resolvedElement2.type];
+      if (!Component2) return null;
+      const children2 = resolvedElement2.children?.map(
+        (childKey) => renderElement(
+          childKey,
+          spec,
+          registry,
+          stateModel,
+          item,
+          index,
+          childPath
+        )
+      );
+      return /* @__PURE__ */ jsx2(Component2, { element: resolvedElement2, emit: noopEmit, children: children2 }, key);
+    });
+    return /* @__PURE__ */ jsx2(Fragment, { children: fragments });
+  }
   if (element.visible !== void 0) {
     if (!evaluateVisibility(element.visible, ctx)) {
       return null;
@@ -296,28 +334,6 @@ function renderElement(elementKey, spec, registry, stateModel, repeatItem, repea
   const resolvedElement = { ...element, props: resolvedProps };
   const Component = registry[resolvedElement.type];
   if (!Component) return null;
-  if (resolvedElement.repeat) {
-    const items = getByPath(stateModel, resolvedElement.repeat.statePath) ?? [];
-    const repeat = resolvedElement.repeat;
-    const fragments = items.map((item, index) => {
-      const repeatKey = repeat.key;
-      const key = repeatKey && typeof item === "object" && item !== null ? String(item[repeatKey] ?? index) : String(index);
-      const childPath = `${repeat.statePath}/${index}`;
-      const children2 = resolvedElement.children?.map(
-        (childKey) => renderElement(
-          childKey,
-          spec,
-          registry,
-          stateModel,
-          item,
-          index,
-          childPath
-        )
-      );
-      return /* @__PURE__ */ jsx2(Component, { element: resolvedElement, emit: noopEmit, children: children2 }, key);
-    });
-    return /* @__PURE__ */ jsx2(Fragment, { children: fragments });
-  }
   const children = resolvedElement.children?.map(
     (childKey) => renderElement(
       childKey,
@@ -367,4 +383,4 @@ export {
   renderToHtml,
   renderToPlainText
 };
-//# sourceMappingURL=chunk-ZNM3SPC5.mjs.map
+//# sourceMappingURL=chunk-QVZ2EM7B.mjs.map

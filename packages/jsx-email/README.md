@@ -148,6 +148,23 @@ Import schema and catalog definitions without pulling in React or `jsx-email`:
 import { schema, standardComponentDefinitions } from "@json-render/jsx-email/server";
 ```
 
+## GitHub Release Tarball
+
+The release workflow publishes a GitHub Release asset named `json-render-jsx-email-<version>.tgz`. Segmentflow should consume that asset from the json-render release tag matching the package version, then vendor or install it as `@json-render/jsx-email`.
+
+Validate the artifact before refreshing Segmentflow:
+
+```bash
+pnpm --filter @json-render/jsx-email smoke:tarball
+```
+
+The smoke path packs the package into the same `.tgz` shape uploaded to GitHub Releases and verifies these entry points load from the unpacked artifact:
+
+- `@json-render/jsx-email`
+- `@json-render/jsx-email/render`
+- `@json-render/jsx-email/catalog`
+- `@json-render/jsx-email/server`
+
 ## Documentation
 
 Full API reference: [json-render.dev/docs/api/jsx-email](https://json-render.dev/docs/api/jsx-email).

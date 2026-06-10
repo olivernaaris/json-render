@@ -41,28 +41,13 @@ function renderElement(
     repeatBasePath,
   };
 
-  if (element.visible !== undefined) {
-    if (!evaluateVisibility(element.visible, ctx)) {
-      return null;
-    }
-  }
-
-  const resolvedProps = resolveElementProps(
-    element.props as Record<string, unknown>,
-    ctx,
-  );
-  const resolvedElement: UIElement = { ...element, props: resolvedProps };
-
-  const Component = registry[resolvedElement.type];
-  if (!Component) return null;
-
-  if (resolvedElement.repeat) {
+  if (element.repeat) {
     const items =
-      (getByPath(stateModel, resolvedElement.repeat.statePath) as
+      (getByPath(stateModel, element.repeat.statePath) as
         | unknown[]
         | undefined) ?? [];
 
-    const repeat = resolvedElement.repeat!;
+    const repeat = element.repeat;
     const fragments = items.map((item, index) => {
       const repeatKey = repeat.key;
       const key =
@@ -71,6 +56,28 @@ function renderElement(
           : String(index);
 
       const childPath = `${repeat.statePath}/${index}`;
+      const itemCtx: PropResolutionContext = {
+        stateModel,
+        repeatItem: item,
+        repeatIndex: index,
+        repeatBasePath: childPath,
+      };
+
+      if (
+        element.visible !== undefined &&
+        !evaluateVisibility(element.visible, itemCtx)
+      ) {
+        return null;
+      }
+
+      const resolvedProps = resolveElementProps(
+        element.props as Record<string, unknown>,
+        itemCtx,
+      );
+      const resolvedElement: UIElement = { ...element, props: resolvedProps };
+      const Component = registry[resolvedElement.type];
+      if (!Component) return null;
+
       const children = resolvedElement.children?.map((childKey) =>
         renderElement(
           childKey,
@@ -92,6 +99,21 @@ function renderElement(
 
     return <>{fragments}</>;
   }
+
+  if (element.visible !== undefined) {
+    if (!evaluateVisibility(element.visible, ctx)) {
+      return null;
+    }
+  }
+
+  const resolvedProps = resolveElementProps(
+    element.props as Record<string, unknown>,
+    ctx,
+  );
+  const resolvedElement: UIElement = { ...element, props: resolvedProps };
+
+  const Component = registry[resolvedElement.type];
+  if (!Component) return null;
 
   const children = resolvedElement.children?.map((childKey) =>
     renderElement(

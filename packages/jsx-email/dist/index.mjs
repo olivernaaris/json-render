@@ -2,7 +2,7 @@ import {
   renderToHtml,
   renderToPlainText,
   standardComponents
-} from "./chunk-ZNM3SPC5.mjs";
+} from "./chunk-QVZ2EM7B.mjs";
 import {
   schema
 } from "./chunk-AWLFN5UZ.mjs";
