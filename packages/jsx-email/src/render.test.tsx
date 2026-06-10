@@ -1,9 +1,29 @@
 import React from "react";
 import { Text } from "jsx-email";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Spec } from "@json-render/core";
 import { defineRegistry } from "./renderer";
 import { renderToHtml, renderToPlainText } from "./render";
+
+const resolveElementPropsInputs = vi.hoisted(() => [] as unknown[]);
+
+vi.mock("@json-render/core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@json-render/core")>();
+
+  return {
+    ...actual,
+    resolveElementProps: (
+      props: Record<string, unknown> | null | undefined,
+      ctx: import("@json-render/core").PropResolutionContext,
+    ) => {
+      resolveElementPropsInputs.push(props);
+      if (props == null) {
+        throw new Error("resolveElementProps received nullish props");
+      }
+      return actual.resolveElementProps(props, ctx);
+    },
+  };
+});
 
 function htmlSpec(elements: Spec["elements"]): Spec {
   return {
@@ -30,6 +50,10 @@ function htmlSpec(elements: Spec["elements"]): Spec {
 }
 
 describe("jsx-email server rendering", () => {
+  beforeEach(() => {
+    resolveElementPropsInputs.length = 0;
+  });
+
   it("renders primitive specs through HTML and plain text APIs", async () => {
     const spec = htmlSpec({
       heading: {
@@ -217,8 +241,33 @@ describe("jsx-email server rendering", () => {
         props: { text: "Still renders", style: null },
         children: [],
       },
+      repeatedNoPropsContainer: {
+        type: "Section",
+        repeat: { statePath: "/groups", key: "id" },
+        children: ["repeatedText"],
+      } as Spec["elements"][string],
+      repeatedNullPropsContainer: {
+        type: "Section",
+        props: null,
+        repeat: { statePath: "/groups", key: "id" },
+        children: ["repeatedText"],
+      } as unknown as Spec["elements"][string],
+      repeatedText: {
+        type: "Text",
+        props: { text: { $item: "label" }, style: null },
+        children: [],
+      },
     });
 
-    await expect(renderToHtml(spec)).resolves.toContain("Still renders");
+    const html = await renderToHtml(spec, {
+      state: {
+        groups: [{ id: "group-1", label: "Repeated item" }],
+      },
+    });
+
+    expect(html).toContain("Still renders");
+    expect(html).toContain("Repeated item");
+    expect(resolveElementPropsInputs).not.toContain(null);
+    expect(resolveElementPropsInputs).not.toContain(undefined);
   });
 });

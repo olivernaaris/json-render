@@ -300,10 +300,8 @@ function renderElement(elementKey, spec, registry, stateModel, repeatItem, repea
       if (element.visible !== void 0 && !evaluateVisibility(element.visible, itemCtx)) {
         return null;
       }
-      const resolvedProps2 = resolveElementProps(
-        element.props,
-        itemCtx
-      );
+      const rawProps2 = element.props ?? {};
+      const resolvedProps2 = resolveElementProps(rawProps2, itemCtx);
       const resolvedElement2 = { ...element, props: resolvedProps2 };
       const Component2 = registry[resolvedElement2.type];
       if (!Component2) return null;
@@ -327,10 +325,8 @@ function renderElement(elementKey, spec, registry, stateModel, repeatItem, repea
       return null;
     }
   }
-  const resolvedProps = resolveElementProps(
-    element.props,
-    ctx
-  );
+  const rawProps = element.props ?? {};
+  const resolvedProps = resolveElementProps(rawProps, ctx);
   const resolvedElement = { ...element, props: resolvedProps };
   const Component = registry[resolvedElement.type];
   if (!Component) return null;
@@ -383,4 +379,4 @@ export {
   renderToHtml,
   renderToPlainText
 };
-//# sourceMappingURL=chunk-QVZ2EM7B.mjs.map
+//# sourceMappingURL=chunk-NQQMHKVZ.mjs.map

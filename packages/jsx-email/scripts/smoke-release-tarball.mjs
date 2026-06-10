@@ -13,7 +13,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const entryPoints = [
   "@json-render/jsx-email",
@@ -130,7 +130,46 @@ const installedPackageDir = join(scopedPackageDir, "jsx-email");
 mkdirSync(scopedPackageDir, { recursive: true });
 cpSync(join(extractDir, "package"), installedPackageDir, { recursive: true });
 
-for (const dependencyName of ["@json-render/core", "jsx-email", "react", "zod"]) {
+const corePackageRoot = resolvePackageRoot("@json-render/core");
+const coreShimDir = join(scopedPackageDir, "core");
+mkdirSync(coreShimDir, { recursive: true });
+writeFileSync(
+  join(coreShimDir, "package.json"),
+  JSON.stringify(
+    {
+      name: "@json-render/core",
+      type: "module",
+      exports: {
+        ".": {
+          import: "./index.mjs",
+        },
+      },
+    },
+    null,
+    2,
+  ),
+);
+writeFileSync(
+  join(coreShimDir, "index.mjs"),
+  `
+import * as actual from ${JSON.stringify(
+    pathToFileURL(join(corePackageRoot, "dist/index.mjs")).href,
+  )};
+
+export * from ${JSON.stringify(
+    pathToFileURL(join(corePackageRoot, "dist/index.mjs")).href,
+  )};
+
+export function resolveElementProps(props, ctx) {
+  if (props == null) {
+    throw new Error("resolveElementProps received nullish props");
+  }
+  return actual.resolveElementProps(props, ctx);
+}
+`,
+);
+
+for (const dependencyName of ["jsx-email", "react", "zod"]) {
   const dependencyDir = realpathSync(resolvePackageRoot(dependencyName));
   const dependencyTarget = join(consumerNodeModules, dependencyName);
 
@@ -145,14 +184,54 @@ writeFileSync(
 
 const importScript = `
 const entryPoints = ${JSON.stringify(entryPoints)};
+let renderModule;
 
 for (const specifier of entryPoints) {
   const mod = await import(specifier);
   if (Object.keys(mod).length === 0) {
     throw new Error(\`No exports loaded for \${specifier}\`);
   }
+  if (specifier === "@json-render/jsx-email/render") {
+    renderModule = mod;
+  }
   console.log(\`Loaded \${specifier}\`);
 }
+
+const html = await renderModule.renderToHtml({
+  root: "html",
+  elements: {
+    html: {
+      type: "Html",
+      props: { lang: "en" },
+      children: ["body"],
+    },
+    body: {
+      type: "Body",
+      props: {},
+      children: ["container"],
+    },
+    container: {
+      type: "Container",
+      children: ["divider", "text"],
+    },
+    divider: {
+      type: "Hr",
+      props: null,
+      children: [],
+    },
+    text: {
+      type: "Text",
+      props: { text: "Nullish props render", style: null },
+      children: [],
+    },
+  },
+});
+
+if (!html.includes("Nullish props render")) {
+  throw new Error("Rendered HTML did not contain expected text");
+}
+
+console.log("Rendered nullish props smoke spec");
 `;
 
 const output = execFileSync(

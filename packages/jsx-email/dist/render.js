@@ -299,10 +299,8 @@ function renderElement(elementKey, spec, registry, stateModel, repeatItem, repea
       if (element.visible !== void 0 && !(0, import_core.evaluateVisibility)(element.visible, itemCtx)) {
         return null;
       }
-      const resolvedProps2 = (0, import_core.resolveElementProps)(
-        element.props,
-        itemCtx
-      );
+      const rawProps2 = element.props ?? {};
+      const resolvedProps2 = (0, import_core.resolveElementProps)(rawProps2, itemCtx);
       const resolvedElement2 = { ...element, props: resolvedProps2 };
       const Component2 = registry[resolvedElement2.type];
       if (!Component2) return null;
@@ -326,10 +324,8 @@ function renderElement(elementKey, spec, registry, stateModel, repeatItem, repea
       return null;
     }
   }
-  const resolvedProps = (0, import_core.resolveElementProps)(
-    element.props,
-    ctx
-  );
+  const rawProps = element.props ?? {};
+  const resolvedProps = (0, import_core.resolveElementProps)(rawProps, ctx);
   const resolvedElement = { ...element, props: resolvedProps };
   const Component = registry[resolvedElement.type];
   if (!Component) return null;

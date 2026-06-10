@@ -70,10 +70,8 @@ function renderElement(
         return null;
       }
 
-      const resolvedProps = resolveElementProps(
-        element.props as Record<string, unknown>,
-        itemCtx,
-      );
+      const rawProps = (element.props ?? {}) as Record<string, unknown>;
+      const resolvedProps = resolveElementProps(rawProps, itemCtx);
       const resolvedElement: UIElement = { ...element, props: resolvedProps };
       const Component = registry[resolvedElement.type];
       if (!Component) return null;
@@ -106,10 +104,8 @@ function renderElement(
     }
   }
 
-  const resolvedProps = resolveElementProps(
-    element.props as Record<string, unknown>,
-    ctx,
-  );
+  const rawProps = (element.props ?? {}) as Record<string, unknown>;
+  const resolvedProps = resolveElementProps(rawProps, ctx);
   const resolvedElement: UIElement = { ...element, props: resolvedProps };
 
   const Component = registry[resolvedElement.type];
