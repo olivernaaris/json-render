@@ -230,7 +230,8 @@ jobs:
           pnpm --filter @json-render/jsx-email pack --pack-destination "$PACK_DIR"
           TGZ="$PACK_DIR/json-render-jsx-email-$VERSION.tgz"
           test -f "$TGZ"
-          tar -tzf "$TGZ" | grep -qx "package/dist/catalog.mjs"
+          tar -tzf "$TGZ" > "$PACK_DIR/contents.txt"
+          grep -qx "package/dist/catalog.mjs" "$PACK_DIR/contents.txt"
           echo "tgz=$TGZ" >> "$GITHUB_OUTPUT"
 
       - name: Upload tarball to GitHub Release
