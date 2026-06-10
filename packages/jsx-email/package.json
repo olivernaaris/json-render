@@ -1,6 +1,7 @@
 {
   "name": "@json-render/jsx-email",
   "version": "0.18.0",
+  "private": true,
   "license": "Apache-2.0",
   "description": "jsx-email renderer for @json-render/core. JSON becomes HTML emails via jsx-email.",
   "keywords": [
@@ -21,9 +22,6 @@
   "homepage": "https://json-render.dev",
   "bugs": {
     "url": "https://github.com/vercel-labs/json-render/issues"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -51,11 +49,14 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
+    "prepack": "pnpm run build",
+    "smoke:exports": "node --input-type=module -e \"for (const specifier of ['@json-render/jsx-email','@json-render/jsx-email/catalog','@json-render/jsx-email/render','@json-render/jsx-email/server']) await import(specifier);\"",
     "check-types": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },

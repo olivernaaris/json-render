@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  release:
+    types:
+      - published
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
@@ -11,6 +14,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   check-release:
     name: Check for new version
+    if: github.event_name != 'release'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -153,5 +157,54 @@ jobs:
               --title "$TAG" \
               --notes-file /tmp/release-notes.md
           fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  jsx-email-release-asset:
+    name: Upload @json-render/jsx-email tarball
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build @json-render/jsx-email
+        run: pnpm --filter @json-render/jsx-email build
+
+      - name: Smoke test package exports
+        run: pnpm --filter @json-render/jsx-email smoke:exports
+
+      - name: Pack and verify tarball
+        id: pack
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./packages/jsx-email/package.json').version")
+          PACK_DIR="$RUNNER_TEMP/jsx-email-pack"
+          mkdir -p "$PACK_DIR"
+          pnpm --filter @json-render/jsx-email pack --pack-destination "$PACK_DIR"
+          TGZ="$PACK_DIR/json-render-jsx-email-$VERSION.tgz"
+          test -f "$TGZ"
+          tar -tzf "$TGZ" | grep -qx "package/dist/catalog.mjs"
+          echo "tgz=$TGZ" >> "$GITHUB_OUTPUT"
+
+      - name: Upload tarball to GitHub Release
+        run: gh release upload "${{ github.event.release.tag_name }}" "${{ steps.pack.outputs.tgz }}" --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
