@@ -18,7 +18,7 @@ npm install @json-render/core @json-render/react-pdf
 # or for HTML email (react-email)
 npm install @json-render/core @json-render/react-email @react-email/components @react-email/render
 # or for HTML email (jsx-email)
-npm install @json-render/core @json-render/jsx-email jsx-email
+npm install @json-render/core @json-render/jsx-email jsx-email @jsx-email/plugin-inline @jsx-email/plugin-minify @jsx-email/plugin-pretty canispam
 # or for Vue
 npm install @json-render/core @json-render/vue
 # or for Svelte

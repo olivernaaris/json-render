@@ -5,8 +5,10 @@
 ## Install
 
 ```bash
-npm install @json-render/core @json-render/jsx-email jsx-email
+npm install @json-render/core @json-render/jsx-email jsx-email @jsx-email/plugin-inline @jsx-email/plugin-minify @jsx-email/plugin-pretty canispam
 ```
+
+`@json-render/jsx-email` follows `jsx-email` v3 and is ESM-only. Use it from Node.js 22 or newer with `import` syntax.
 
 ## Quick Start
 
@@ -158,7 +160,7 @@ Validate the artifact before refreshing Segmentflow:
 pnpm --filter @json-render/jsx-email smoke:tarball
 ```
 
-The smoke path packs the package into the same `.tgz` shape uploaded to GitHub Releases and verifies these entry points load from the unpacked artifact:
+The smoke path packs the package into the same ESM-only `.tgz` shape uploaded to GitHub Releases and verifies these entry points load from the unpacked artifact:
 
 - `@json-render/jsx-email`
 - `@json-render/jsx-email/render`
