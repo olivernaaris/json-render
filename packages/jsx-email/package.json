@@ -23,29 +23,25 @@
   "bugs": {
     "url": "https://github.com/vercel-labs/json-render/issues"
   },
-  "main": "./dist/index.js",
+  "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
     },
     "./server": {
-      "types": "./dist/server.d.ts",
-      "import": "./dist/server.mjs",
-      "require": "./dist/server.js"
+      "types": "./dist/server.d.mts",
+      "import": "./dist/server.mjs"
     },
     "./catalog": {
-      "types": "./dist/catalog.d.ts",
-      "import": "./dist/catalog.mjs",
-      "require": "./dist/catalog.js"
+      "types": "./dist/catalog.d.mts",
+      "import": "./dist/catalog.mjs"
     },
     "./render": {
-      "types": "./dist/render.d.ts",
-      "import": "./dist/render.mjs",
-      "require": "./dist/render.js"
+      "types": "./dist/render.d.mts",
+      "import": "./dist/render.mjs"
     }
   },
   "files": [
@@ -63,18 +59,27 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "jsx-email": "^2.8.4"
+    "jsx-email": "3.2.1"
   },
   "devDependencies": {
+    "@jsx-email/plugin-inline": "^2.0.0",
+    "@jsx-email/plugin-minify": "^2.0.0",
+    "@jsx-email/plugin-pretty": "^2.0.0",
     "@internal/typescript-config": "workspace:*",
     "@json-render/core": "workspace:*",
-    "@types/react": "19.2.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "canispam": "^1.0.0",
     "tsup": "^8.0.2",
     "typescript": "^5.4.5",
     "zod": "^4.0.0"
   },
   "peerDependencies": {
+    "@jsx-email/plugin-inline": "^2.0.0",
+    "@jsx-email/plugin-minify": "^2.0.0",
+    "@jsx-email/plugin-pretty": "^2.0.0",
     "@json-render/core": "*",
+    "canispam": "^1.0.0",
     "react": "^19.0.0",
     "zod": "^4.0.0"
   }

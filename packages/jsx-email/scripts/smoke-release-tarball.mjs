@@ -101,14 +101,14 @@ const contents = execFileSync("tar", ["-tzf", tarballPath], {
 
 const requiredFiles = [
   "package/package.json",
+  "package/dist/index.d.mts",
   "package/dist/index.mjs",
-  "package/dist/index.js",
+  "package/dist/render.d.mts",
   "package/dist/render.mjs",
-  "package/dist/render.js",
+  "package/dist/catalog.d.mts",
   "package/dist/catalog.mjs",
-  "package/dist/catalog.js",
+  "package/dist/server.d.mts",
   "package/dist/server.mjs",
-  "package/dist/server.js",
 ];
 
 for (const file of requiredFiles) {
